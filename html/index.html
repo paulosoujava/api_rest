@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Compiled and minified CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+
+    <!-- Compiled and minified JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+
+    <title>API</title>
+</head>
+
+<body>
+    <center>
+
+        <div class="col s12 m6">
+            <div class="card blue-grey darken-1">
+                <div class="card-content white-text">
+                    <span class="card-title">Axios:: Consumo de Api com -> JAvascript</span>
+                    <p>Uma simples demonstração de consumo, da api criada em node com express. e consuminda com javascript com axios, Verbos: POST | PUT | DELETE | GET</p>
+                </div>
+            </div>
+        </div>
+
+
+
+    </center>
+
+    <div class="row">
+        <div class="col s12">
+            <div class="row" id="ct3" style="display: none;">
+                <div style="margin-right: 15px;">
+                    <button class="btn red right" onclick="logout()">LOGOUT</button>
+                </div>
+            </div>
+            <hr />
+            <div class="col s6" style="display: none;" id="ct4">
+                <ul id="games" class="collection"></ul>
+            </div>
+            <div class="col s3" id="ct1" style="display: none;">
+                <div class="card">
+                    <div class="container">
+                        <h2>Create</h2>
+                        <input type="text" id="idx" placeholder="id">
+                        <input type="text" id="title" placeholder="title">
+                        <input type="text" id="year" placeholder="year">
+                        <input type="text" id="price" placeholder="price">
+                        <button onclick="create()" type="button" class="btn">Criar</button>
+                        <br /><br />
+                    </div>
+                </div>
+            </div>
+            <div class="col s3" id="ct2" style="display: none;">
+                <div class="card">
+                    <div class="container">
+                        <h2>Editar</h2>
+                        <input type="text" id="idEd" placeholder="id">
+                        <input type="text" id="titleEd" placeholder="title">
+                        <input type="text" id="yearEd" placeholder="year">
+                        <input type="text" id="priceEd" placeholder="price">
+                        <button onclick="up()" type="button" class="btn">Editar</button>
+                        <br /><br />
+                    </div>
+                </div>
+            </div>
+
+            <div class="col s3" id="containerLogin">
+                <div class="card">
+                    <div class="container">
+                        <h2>Autenticar</h2>
+                        <input type="text" id="email" placeholder="email">
+                        <input type="password" id="senha" placeholder="senha">
+                        <button onclick="auth()" type="button" class="btn">Logar</button>
+                        <br /><br />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+</body>
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<script>
+    function logout() {
+        localStorage.setItem('token', '')
+        location.reload();
+    }
+
+    var tk = localStorage.getItem('token');
+    if (tk) {
+        document.getElementById('containerLogin').style.display = 'none';
+        document.getElementById('ct1').style.display = 'inherit';
+        document.getElementById('ct3').style.display = 'inherit';
+
+
+    }
+    var axiosConfig = {
+        headers: {
+            Authorization: "Bearer " + localStorage.getItem('token')
+        }
+    }
+
+    function auth() {
+        var emailF = document.getElementById('email');
+        var senhaF = document.getElementById('senha');
+
+        email = emailF.value;
+        senha = senhaF.value;
+        console.log(email, senha)
+        axios.post("http://localhost:3000/auth", {
+            email,
+            senha
+        }).then(res => {
+            var token = res.data.token;
+            localStorage.setItem('token', token);
+            axiosConfig.headers.Authorization = "Bearer" + localStorage.getItem('token');
+            location.reload();
+        }).catch(err => {
+            console.log("Ops " + err)
+        })
+
+    }
+
+    function load(item) {
+        var id = item.getAttribute("data-id");
+        var title = item.getAttribute("data-title");
+        var year = item.getAttribute("data-year")
+        var price = item.getAttribute("data-price");
+        document.getElementById("titleEd").value = title;
+        document.getElementById("yearEd").value = year;
+        document.getElementById("priceEd").value = price;
+        document.getElementById("idEd").value = id;
+
+
+    }
+
+    function up() {
+        var titleInp = document.getElementById("titleEd");
+        var yearInp = document.getElementById("yearEd");
+        var priceInp = document.getElementById("priceEd");
+        var id = document.getElementById("idEd");
+        console.log(titleInp.value)
+        var game = {
+            title: titleInp.value,
+            year: yearInp.value,
+            price: priceInp.value,
+        }
+        axios.put("http://localhost:3000/game/" + id.value, game)
+            .then(res => {
+                console.log(res.status)
+                location.reload();
+            })
+            .catch(err => {
+                console.log(err)
+            })
+    }
+
+
+    function del(item) {
+        var id = item.getAttribute("data-id");
+        axios.delete("http://localhost:3000/game/" + id)
+            .then(res => {
+                location.reload();
+                console.log(res.status)
+            })
+            .catch(err => {
+                console.log(err)
+            })
+    }
+
+    function create() {
+        var id = document.getElementById("idx");
+        var titleInp = document.getElementById("title");
+        var yearInp = document.getElementById("year");
+        var priceInp = document.getElementById("price");
+        console.log(id.value)
+        var game = {
+            id: id.value,
+            title: id.value,
+            title: titleInp.value,
+            year: yearInp.value,
+            price: priceInp.value,
+        }
+        axios.post("http://localhost:3000/game", game)
+            .then(res => {
+                console.log(res.status)
+                location.reload();
+            })
+            .catch(err => {
+                console.log(err)
+            })
+        console.log(game)
+    }
+
+    axios.get("http://localhost:3000/", axiosConfig).then(response => {
+        var games = response.data.games;
+        var list = document.getElementById("games");
+
+
+        if (games.length) {
+            document.getElementById('ct2').style.display = 'inherit';
+            document.getElementById('ct4').style.display = 'inherit';
+        }
+        games.forEach(game => {
+            var item = document.createElement("li");
+            item.style.margin = '10px';
+            item.style.fontSize = '18px';
+            item.style.padding = '10px';
+            item.setAttribute("data-id", game.id);
+            item.setAttribute("data-title", game.title);
+            item.setAttribute("data-year", game.year);
+            item.setAttribute("data-price", game.price);
+            item.setAttribute("class", "collection-item")
+            item.innerHTML = `Id:: ${game.id}<br />Title:: ${game.title}<br />Price:: ${game.price} - Year::
+     ${game.year}<br />`;
+            var deleteBtn = document.createElement("button");
+            deleteBtn.setAttribute("class", "btn red");
+
+            deleteBtn.style.margin = '10px';
+            deleteBtn.style.width = '90px';
+            deleteBtn.style.height = '40px';
+
+            deleteBtn.innerHTML = "deletar";
+            item.appendChild(deleteBtn);
+            deleteBtn.addEventListener("click", () => {
+                del(item)
+            })
+
+            var editBtn = document.createElement("button");
+            editBtn.setAttribute("class", "btn green");
+            editBtn.innerHTML = "editar";
+            editBtn.style.width = '90px';
+            editBtn.style.height = '40px';
+            editBtn.addEventListener("click", () => {
+                load(item)
+            });
+            item.appendChild(editBtn);
+
+
+            list.appendChild(item)
+        });
+    }).catch(err => {
+        console.log("Ops" + err);
+    });
+</script>
+
+</html>
